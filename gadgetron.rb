@@ -2,19 +2,18 @@ require "formula"
 
 class Gadgetron < Formula
   homepage "https://gadgetron.github.io"
-  url "https://github.com/gadgetron/gadgetron/releases/download/v3.0.0/gadgetron-v3.0.0.tar.gz"
-  sha1 "cf8ca84896c48c0ef8319f576f3a2745c2d2b5e2"
+  url "https://github.com/gadgetron/gadgetron/archive/v3.1.0.tar.gz"
+  sha1 "477ed925ec05399adc9c96967146719084655f93"
 
   depends_on 'cmake' => :build
   depends_on 'ismrmrd'
   depends_on 'boost'
   depends_on 'ace'
   depends_on 'armadillo'
-  depends_on 'qt' => :optional
-  depends_on 'docbook-xsl' => :optional
-  depends_on 'fop' => :optional
+  depends_on 'qt' => :recommended
   depends_on 'dcmtk' => :recommended
-  depends_on 'python' => :recommended
+  depends_on 'numpy' => :recommended
+  depends_on 'boost-python' => :recommended
 
   def install
     # Gadgetron adds "gadgetron" to the end of CMAKE_INSTALL_PREFIX by default
@@ -33,32 +32,10 @@ class Gadgetron < Formula
     mkdir "gadgetron-build" do
         system "cmake", "..", *args
         system "make", "install"
+        if !File.exist? "#{prefix}/config/gadgetron.xml"
+            cp "#{prefix}/config/gadgetron.xml.example", "#{prefix}/config/gadgetron.xml"
+        end
     end
-  end
-
-  # test do
-  #   ENV['GADGETRON_HOME'] = "#{prefix}"
-
-  #   pid = fork do
-  #     exec "#{bin}/gadgetron > /dev/null 2>&1"
-  #   end
-  #   system 'ismrmrd_create_dataset'
-
-  #   system "#{bin}/mriclient", '-d', 'testdata.h5', '-c', 'default.xml'
-
-  #   assert(File.stat('out.h5').size > 1024,
-  #          "Did not receive valid HDF5 reconstruction")
-
-  #   Process.kill 'TERM', pid
-  #   Process.wait pid
-  # end
-
-  def caveats; <<-EOS.undent
-    Export the following environment variable in your shell profile:
-      GADGETRON_HOME=#{prefix}
-    To start using Gadgetron, copy
-      $GADGETRON_HOME/config/gadgetron.xml.example -> $GADGETRON_HOME/config/gadgetron.xml
-    EOS
   end
 
 end
